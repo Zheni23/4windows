@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multi Window Grid with Address Bar</title>
+  <style>
+    body{
+      margin:0;
+      display:flex;
+      flex-direction:column;
+      height:100vh;
+      background:#111;
+      color:#eee;
+      font-family:sans-serif;
+    }
+    header{
+      display:flex;
+      gap:8px;
+      padding:8px;
+      background:#222;
+      align-items:center;
+    }
+    header input, header select, header button{
+      padding:6px 8px;
+      border:none;
+      border-radius:4px;
+      font-size:14px;
+    }
+    header input{
+      flex:1;
+    }
+    header button{
+      background:#0ea5e9;
+      color:white;
+      cursor:pointer;
+    }
+    .grid{
+      flex:1;
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      grid-template-rows:repeat(2,1fr);
+      gap:4px;
+    }
+    .grid > iframe {
+      width:100%;
+      height:100%;
+      min-height:0;
+      border:none;
+      background:white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <input type="text" id="urlInput" placeholder="Enter website URL" />
+    <select id="windowSelect">
+      <option value="0">Window 1</option>
+      <option value="1">Window 2</option>
+      <option value="2">Window 3</option>
+      <option value="3">Window 4</option>
+    </select>
+    <button id="loadBtn">Load</button>
+  </header>
+
+  <div class="grid" id="grid">
+    <iframe src="http://localhost:3000"></iframe>
+    <iframe src="https://dexscreener.com/"></iframe>
+    <iframe src="https://www.openai.com"></iframe>
+    <iframe src="https://www.reddit.com"></iframe>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById('urlInput');
+    const windowSelect = document.getElementById('windowSelect');
+    const loadBtn = document.getElementById('loadBtn');
+    const iframes = Array.from(document.querySelectorAll('#grid iframe'));
+
+    // 1. Function to update input based on current selection
+    function updateAddressBar() {
+      const idx = parseInt(windowSelect.value);
+      if(iframes[idx]) {
+        // Get the current source of the selected iframe
+        const currentUrl = iframes[idx].getAttribute('src');
+        urlInput.value = currentUrl || ''; 
+      }
+    }
+
+    function loadUrl(){
+      let url = urlInput.value.trim();
+      if(!url) return;
+      if(!url.startsWith('http://') && !url.startsWith('https://')){
+        url = 'https://' + url;
+      }
+      const idx = parseInt(windowSelect.value);
+      if(iframes[idx]){
+        iframes[idx].src = url;
+        // Optionally update the input to the formatted URL
+        urlInput.value = url; 
+      }
+    }
+
+    loadBtn.addEventListener('click', loadUrl);
+    
+    urlInput.addEventListener('keydown', e=>{
+      if(e.key==='Enter') loadUrl();
+    });
+
+    // 2. Add listener: When user changes the dropdown, update the address bar
+    windowSelect.addEventListener('change', updateAddressBar);
+
+    // 3. Run once on startup to show the URL of the first window
+    updateAddressBar();
+
+  </script>
+</body>
+</html>
